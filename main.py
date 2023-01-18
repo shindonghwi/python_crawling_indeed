@@ -17,7 +17,7 @@ import base64
 import urllib
 import os
 import glob
-
+from os import path
 
 class Indeed:
     __file: IO[io.FileIO]
@@ -99,7 +99,6 @@ class Indeed:
 
     def __move_company_page(self, link, country_name, company_name):
         print('start -> ', country_name, company_name, link)
-        from os import path
 
         try:
             if not os.path.exists(os.getcwd() + '/data/api_links/{}'.format(company_name)):
