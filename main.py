@@ -19,6 +19,7 @@ import os
 import glob
 from os import path
 
+
 class Indeed:
     __file: IO[io.FileIO]
 
@@ -109,12 +110,9 @@ class Indeed:
         if path.exists(
                 os.getcwd() + '/data/api_links/{}/{}.txt'.format(company_name, country_name)):
             return
-        else:
-            f = open(os.getcwd() + '/data/api_links/{}/{}.txt'.format(company_name, country_name),
-                     'a+')
-            f.close()
+
         print('run -> ', country_name, company_name, link)
-        time.sleep(2)
+        time.sleep(2.5)
         self.__driver.get(link)
         html = self.__get_current_html()
 
@@ -144,21 +142,28 @@ class Indeed:
             time.sleep(4)
             self.__get_company_key(company_api_key_code_list)
 
-        api_link_file = open(os.getcwd() + '/data/api_links/{}/{}.txt'.format(
-            company_name, country_name
-        ), 'w', encoding='utf-8')
+        api_result_file = os.getcwd() + '/data/api_links/{}/{}.txt'.format(
+            company_name, country_name)
 
-        for key in company_api_key_code_list:
-            api_url = 'https://www.indeed.com/viewjob' \
-                      '?viewtype=embedded' \
-                      '&jk={}' \
-                      '&from=vjs' \
-                      '&tk=1gmvgpksbh0kh800' \
-                      '&continueUrl=%2Fjobs%3Fsc%3D0fcckey%253Ad1342c7b78af94a6%252Ckf%253Afcckey%2528d1342c7b78af94a6%2529%252Cq%253A%253B%26q%3Dplug%2Bpower%26vjk%3Da2e4eb960ae9084f' \
-                      '&spa=1' \
-                      '&hidecmpheader=1'.format(key)
-            api_link_file.write(api_url)
-            api_link_file.write('\n')
+        if path.exists(api_result_file):
+            api_link_file = open(api_result_file, 'r+', encoding='utf-8')
+            success_index = len(api_link_file.readlines())
+        else:
+            api_link_file = open(api_result_file, 'w+', encoding='utf-8')
+            success_index = 0
+
+        for idx, key in enumerate(company_api_key_code_list):
+            if idx >= success_index:
+                api_url = 'https://www.indeed.com/viewjob' \
+                          '?viewtype=embedded' \
+                          '&jk={}' \
+                          '&from=vjs' \
+                          '&tk=1gmvgpksbh0kh800' \
+                          '&continueUrl=%2Fjobs%3Fsc%3D0fcckey%253Ad1342c7b78af94a6%252Ckf%253Afcckey%2528d1342c7b78af94a6%2529%252Cq%253A%253B%26q%3Dplug%2Bpower%26vjk%3Da2e4eb960ae9084f' \
+                          '&spa=1' \
+                          '&hidecmpheader=1'.format(key)
+                api_link_file.write(api_url)
+                api_link_file.write('\n')
         api_link_file.close()
 
     def __get_company_key(self, company_api_key_code_list):
