@@ -34,6 +34,7 @@ if __name__ == '__main__':
 
         for i, file_path in enumerate(tqdm(country_txt_file_path_list)):
             country_name = file_path.split('/')[-1].replace('.txt', '').replace('\n', '')
+
             print('start : ', company_name, country_name)
             ws = wb.create_sheet(index=i, title=country_name)
             ws['A1'] = 'gubun'
@@ -64,32 +65,38 @@ if __name__ == '__main__':
                 company_name = company_name
                 region = body['jobLocation']
                 job_title = job_info_model['jobInfoHeaderModel']['jobTitle']
-                salary = None
                 url = 'https://{}.indeed.com/cmp/{}/jobs?jk={}'.format(country_name, company_name,
                                                                        body['jobKey'])
-
+                salary = None
+                s_currency = None
+                s_max = None
+                s_min = None
+                s_type = None
                 try:
-                    salaryCurrency = job_info_model['jobInfoHeaderModel']['salaryCurrency']
-                    salaryMax = job_info_model['jobInfoHeaderModel']['salaryMax']
-                    salaryMin = job_info_model['jobInfoHeaderModel']['salaryMin']
-                    salaryType = job_info_model['jobInfoHeaderModel']['salaryType']
-                    salary = "[{}]\nMin:{}\nMax:{}\ntype:{}".format(salaryCurrency, salaryMin,
-                                                                    salaryMax, salaryType)
-                    if salaryMax is None or salaryMin is None:
-                        salary = None
+                    job_info_model = body['jobInfoWrapperModel']['jobInfoModel']
+                    s_currency = job_info_model['jobInfoHeaderModel']['salaryCurrency']
+                    s_max = job_info_model['jobInfoHeaderModel']['salaryMax']
+                    s_min = job_info_model['jobInfoHeaderModel']['salaryMin']
+                    s_type = job_info_model['jobInfoHeaderModel']['salaryType']
+                    salary = "[{}]\nMin:{}\nMax:{}\ntype:{}".format(s_currency, s_min,
+                                                                    s_max, s_type)
+                except Exception as e:
+                    pass
 
-                    sgm_range = body['salaryGuideModel']['formattedRange']
-                    sgm_max = body['salaryGuideModel']['max']
-                    sgm_min = body['salaryGuideModel']['min']
-                    sgm_type = body['salaryGuideModel']['type']
+                if s_max is None and s_min is None:
+                    try:
+                        sgm_range = body['salaryGuideModel']['estimatedSalaryModel']['formattedRange']
+                        sgm_max = body['salaryGuideModel']['estimatedSalaryModel']['max']
+                        sgm_min = body['salaryGuideModel']['estimatedSalaryModel']['min']
+                        sgm_type = body['salaryGuideModel']['estimatedSalaryModel']['type']
 
-                    if sgm_max is None or sgm_min is None:
+                        if sgm_max is None and sgm_min is None:
+                            salary = None
+                        else:
+                            salary = "[{}]\nMin:{}\nMax:{}\ntype:{}".format(sgm_range, sgm_min,
+                                                                            sgm_max, sgm_type)
+                    except:
                         salary = None
-                    else:
-                        salary = "[{}]\nMin:{}\nMax:{}\ntype:{}".format(sgm_range, sgm_min,
-                                                                        sgm_max, sgm_type)
-                except:
-                    salary = None
 
                 try:
                     job_type = \
