@@ -50,12 +50,13 @@ if __name__ == '__main__':
                             'Connection': 'keep-alive',
                             'Cookie': 'CTK=1gmiot58cisbu800; SHARED_INDEED_CSRF_TOKEN=BYTScsLYmqzB0ik5E0N7wZmnBFzEaC0S; __cf_bm=h_VFPbCdIxZMj7k0yU0VQ0z0vrgpgP91JrTeVIoImRI-1674105454-0-Af0+jyMabvJ0NGEW5wntBBScYqrwD3mizceZ11AvMRLHQ4+FXdjRfOPkOcH7eaSu0ZC8mIaYLoslqHa1KJzQJzU=; _cfuvid=xqpg9KdiMi9AMUV9RXBkcZtNyO4hK0cFGePgUkhKBPY-1674105454149-0-604800000; INDEED_CSRF_TOKEN=9c7QI5Ap236ZYDri8xycMeYsGRpHKPBO; LV="LA=1673519863:CV=1673519863:TS=1673519863"; indeed_rcc="LV:CTK"',
                         })
-
+                        print(api)
+                        print(req.status_code)
                         if req.status_code != 200:
                             exit()
                         json_str = req.content.decode('utf-8')
                         json_data = json.loads(json_str)
-                        time.sleep(random.randrange(1,4))
+                        time.sleep(1.5)
                         json_file.write(json_str)
                         json_file.write('\n')
 

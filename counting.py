@@ -2,7 +2,9 @@ import glob
 import os
 
 if __name__ == '__main__':
-    folder_list = glob.glob(os.getcwd() + '/data/api_links/*')
+    # folder_list = glob.glob(os.getcwd() + '/data/api_links/*')
+    # folder_list = glob.glob(os.getcwd() + '\\extract_data\\*')
+    folder_list = glob.glob(os.getcwd() + '/extract_data/*')
 
     counting = 0
 

@@ -5,6 +5,7 @@ import openpyxl as xls
 import re
 from tqdm import tqdm
 
+
 def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
@@ -14,12 +15,18 @@ def cleanhtml(raw_html):
 if __name__ == '__main__':
 
     company_folder_list = glob.glob('{}/{}/*'.format(os.getcwd(), 'extract_data'))
+    xlsx_files = glob.glob('./xlsx_files/*')
+    xlsx_files = list(
+        map(lambda s: s.replace('./xlsx_files/', '').replace('.xlsx', ''), xlsx_files))
 
     for company_index, company_folder in enumerate(company_folder_list):
 
-        wb = xls.Workbook()
-
         company_name = company_folder.split('/')[-1]
+
+        if company_name in xlsx_files:
+            continue
+
+        wb = xls.Workbook()
 
         country_txt_file_path_list = glob.glob('{}/{}/{}/*.txt'.format(
             os.getcwd(), 'extract_data', company_name
@@ -27,7 +34,7 @@ if __name__ == '__main__':
 
         for i, file_path in enumerate(tqdm(country_txt_file_path_list)):
             country_name = file_path.split('/')[-1].replace('.txt', '').replace('\n', '')
-            print('start : ', company_name)
+            print('start : ', company_name, country_name)
             ws = wb.create_sheet(index=i, title=country_name)
             ws['A1'] = 'gubun'
             ws['B1'] = 'companyName'
@@ -58,7 +65,8 @@ if __name__ == '__main__':
                 region = body['jobLocation']
                 job_title = job_info_model['jobInfoHeaderModel']['jobTitle']
                 salary = None
-                url = 'https://{}.indeed.com/cmp/{}/jobs?jk={}'.format(country_name,company_name,body['jobKey'])
+                url = 'https://{}.indeed.com/cmp/{}/jobs?jk={}'.format(country_name, company_name,
+                                                                       body['jobKey'])
 
                 try:
                     salaryCurrency = job_info_model['jobInfoHeaderModel']['salaryCurrency']
@@ -69,15 +77,29 @@ if __name__ == '__main__':
                                                                     salaryMax, salaryType)
                     if salaryMax is None or salaryMin is None:
                         salary = None
+
+                    sgm_range = body['salaryGuideModel']['formattedRange']
+                    sgm_max = body['salaryGuideModel']['max']
+                    sgm_min = body['salaryGuideModel']['min']
+                    sgm_type = body['salaryGuideModel']['type']
+
+                    if sgm_max is None or sgm_min is None:
+                        salary = None
+                    else:
+                        salary = "[{}]\nMin:{}\nMax:{}\ntype:{}".format(sgm_range, sgm_min,
+                                                                        sgm_max, sgm_type)
                 except:
                     salary = None
 
                 try:
                     job_type = \
-                    job_info_model['jobDescriptionSectionModel']['jobDetailsSection']['contents']['Job Type']
+                        job_info_model['jobDescriptionSectionModel']['jobDetailsSection'][
+                            'contents']['Job Type']
 
                     if job_type is None:
-                        job_list = job_info_model['jobDescriptionSectionModel']['jobDetailsSection']['jobTypes']
+                        job_list = \
+                        job_info_model['jobDescriptionSectionModel']['jobDetailsSection'][
+                            'jobTypes']
                         jobs = []
                         for job_item in job_list:
                             jobs.append(job_item['label'])
